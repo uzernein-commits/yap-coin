@@ -53,7 +53,7 @@ export default function Home() {
           </div>
           <div className="flex justify-center">
             <img 
-              src="/yap-frog.png" 
+              src="/yap-frog.PNG" 
               alt="$YAP Frog" 
               className="max-w-md w-full drop-shadow-[0_0_80px_rgba(168,85,247,0.5)] hover:scale-105 transition duration-300"
             />
