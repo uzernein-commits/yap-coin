@@ -1,8 +1,9 @@
 @import "tailwindcss";
 
 :root {
-  --background: #000000;
-  --foreground: #ededed;
+  --background: #050308;
+  --foreground: #f4f0f8;
+  --yap-purple: #c084fc;
   color-scheme: dark;
 }
 
@@ -11,10 +12,85 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-syne);
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+section[id] {
+  scroll-margin-top: 5.5rem;
+}
+
+:focus-visible {
+  outline: 2px solid var(--yap-purple);
+  outline-offset: 3px;
+}
+
+.yap-grid {
+  background-image:
+    linear-gradient(to right, rgba(192, 132, 252, 0.09) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(192, 132, 252, 0.09) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(ellipse at center, black 20%, transparent 72%);
+}
+
+.yap-float {
+  animation: yap-float 7s ease-in-out infinite;
+}
+
+.yap-glow {
+  animation: yap-glow 7s ease-in-out infinite;
+}
+
+.yap-rise {
+  animation: yap-rise 0.7s ease both;
+}
+
+@keyframes yap-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes yap-glow {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+@keyframes yap-rise {
+  from {
+    transform: translateY(8px);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .yap-float,
+  .yap-glow,
+  .yap-rise {
+    animation: none;
+  }
 }
