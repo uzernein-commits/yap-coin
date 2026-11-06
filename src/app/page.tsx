@@ -125,17 +125,25 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CA */}
-      <section id="ca" className="px-6 py-32 text-center">
-        <h2 className="text-4xl font-black mb-4">Contract Address</h2>
-        <p className="text-neutral-500 mb-8">Not live yet. Follow X when it drops.</p>
-        <div className="inline-block border border-purple-500/40 bg-purple-950/30 rounded-2xl px-8 py-6 font-mono text-lg">
-          Coming at launch
-        </div>
-        <div className="mt-8">
-          <a href="#" className="inline-block px-8 py-3 bg-white text-black font-bold rounded-full">Follow on X</a>
-        </div>
-      </section>
+     {/* CA + Socials */}
+<section id="ca" className="px-6 py-32 text-center">
+  <h2 className="text-4xl font-black mb-4">Contract Address</h2>
+  <p className="text-neutral-500 mb-8">Not live yet. Follow X when it drops.</p>
+  <div className="inline-block border border-purple-500/40 bg-purple-950/30 rounded-2xl px-8 py-6 font-mono text-lg mb-10">
+    Coming at launch
+  </div>
+  
+  <div>
+    <a 
+      href="https://x.com/theyapfrog" 
+      target="_blank" 
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-2 px-8 py-3 bg-white text-black font-bold rounded-full hover:bg-neutral-200 transition"
+    >
+      Follow on X
+    </a>
+  </div>
+</section>
 
       <footer className="border-t border-neutral-900 py-12 text-center text-neutral-600 text-sm">
         $YAP — We don’t croak. We cook. Not financial advice. Pure conviction.
