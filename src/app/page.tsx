@@ -1,28 +1,54 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
+import { readChatReply, CHAT_ERRORS } from "@/lib/chat-messages";
+
+const FROG_IMAGE_SRC = "/yap-frog.jpg";
+
+type Bubble = {
+  role: "user" | "assistant";
+  content: string;
+};
 
 export default function Home() {
-  const [messages, setMessages] = useState([
+  const [messages, setMessages] = useState<Bubble[]>([
     { role: "assistant", content: "I am $YAP. Zero books. All yap. Frogs don’t sleep, we just load. What’s good?" }
   ]);
   const [input, setInput] = useState("");
+  const [sending, setSending] = useState(false);
+  const sendingRef = useRef(false);
+  const endRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ block: "end" });
+  }, [messages, sending]);
 
   const sendMessage = async () => {
-    if (!input.trim()) return;
-    const userMessage = { role: "user", content: input };
-    const newMessages = [...messages, userMessage];
-    setMessages(newMessages);
+    const content = input.trim();
+    if (!content || sendingRef.current) return;
+
+    sendingRef.current = true;
+    setSending(true);
+    const history: Bubble[] = [...messages, { role: "user", content }];
+    setMessages(history);
     setInput("");
 
-    const res = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: newMessages }),
-    });
-    const data = await res.json();
-    const assistantMessage = data.choices?.[0]?.message?.content || "Yap failed. Try again.";
-    setMessages([...newMessages, { role: "assistant", content: assistantMessage }]);
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: history.slice(-12) }),
+      });
+      const data = await res.json().catch(() => null);
+      const reply = readChatReply(res.ok, data);
+      setMessages([...history, { role: "assistant", content: reply }]);
+    } catch {
+      setMessages([...history, { role: "assistant", content: CHAT_ERRORS.failed }]);
+    } finally {
+      sendingRef.current = false;
+      setSending(false);
+    }
   };
 
   return (
@@ -52,10 +78,14 @@ export default function Home() {
             </div>
           </div>
           <div className="flex justify-center">
-            <img 
-              src="/yap-frog.PNG" 
-              alt="$YAP Frog" 
-              className="max-w-md w-full drop-shadow-[0_0_80px_rgba(168,85,247,0.5)] hover:scale-105 transition duration-300"
+            <Image
+              src={FROG_IMAGE_SRC}
+              alt="$YAP Frog"
+              width={784}
+              height={1168}
+              preload
+              sizes="(max-width: 768px) 90vw, 448px"
+              className="h-auto w-full max-w-md drop-shadow-[0_0_80px_rgba(168,85,247,0.5)] transition duration-300 hover:scale-105"
             />
           </div>
         </div>
@@ -110,17 +140,43 @@ export default function Home() {
           <h2 className="text-4xl md:text-5xl font-black mb-2">Talk to the Frog</h2>
           <p className="text-neutral-400 mb-10">He doesn’t croak. He cooks.</p>
           <div className="border border-neutral-800 rounded-3xl h-[560px] flex flex-col bg-black/50">
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            <div className="flex-1 overflow-y-auto p-6 space-y-4" aria-busy={sending}>
               {messages.map((msg, i) => (
-                <div key={i} className={`max-w-[80%] rounded-2xl px-5 py-3 ${msg.role === "user" ? "ml-auto bg-white text-black" : "bg-neutral-900"}`}>
+                <div key={i} className={`max-w-[80%] whitespace-pre-wrap break-words rounded-2xl px-5 py-3 ${msg.role === "user" ? "ml-auto bg-white text-black" : "bg-neutral-900"}`}>
                   {msg.content}
                 </div>
               ))}
+              {sending ? (
+                <div className="max-w-[80%] rounded-2xl bg-neutral-900 px-5 py-3 text-neutral-400">cooking...</div>
+              ) : null}
+              <div ref={endRef} />
             </div>
-            <div className="border-t border-neutral-800 p-4 flex gap-3">
-              <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && sendMessage()} placeholder="Yap something..." className="flex-1 bg-neutral-900 border border-neutral-800 rounded-full px-5 py-3 outline-none" />
-              <button onClick={sendMessage} className="bg-white text-black font-black px-6 rounded-full">Yap</button>
-            </div>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                void sendMessage();
+              }}
+              className="border-t border-neutral-800 p-4 flex gap-3"
+            >
+              <input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && e.nativeEvent.isComposing) e.preventDefault();
+                }}
+                placeholder="Yap something..."
+                aria-label="Message the frog"
+                disabled={sending}
+                className="min-w-0 flex-1 bg-neutral-900 border border-neutral-800 rounded-full px-5 py-3 outline-none disabled:opacity-60"
+              />
+              <button
+                type="submit"
+                disabled={sending || !input.trim()}
+                className="bg-white text-black font-black px-6 rounded-full disabled:opacity-40"
+              >
+                {sending ? "..." : "Yap"}
+              </button>
+            </form>
           </div>
         </div>
       </section>
